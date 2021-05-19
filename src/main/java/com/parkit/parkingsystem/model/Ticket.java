@@ -1,13 +1,14 @@
 package com.parkit.parkingsystem.model;
 
-import java.util.Calendar;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 public class Ticket {
     private int id;
     private ParkingSpot parkingSpot;
     private String vehicleRegNumber;
-    private double price;
+    private BigDecimal price; // Changement type variable double en BigDecimal ainsi que le setter and getter arrondis & 2 chiffres après la virgule
     private Date inTime;
     private Date outTime;
 
@@ -35,12 +36,12 @@ public class Ticket {
         this.vehicleRegNumber = vehicleRegNumber;
     }
 
-    public double getPrice() {
-        return price;
+    public BigDecimal getPrice() {
+        return price.setScale(2, RoundingMode.HALF_UP);
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setPrice(BigDecimal price) {
+        this.price = price.setScale(2, RoundingMode.HALF_UP);
     }
 
     public Date getInTime() {

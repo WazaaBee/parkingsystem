@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 
 public class FareCalculatorServiceTest {
@@ -93,7 +95,7 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals((0.75 * Fare.BIKE_RATE_PER_HOUR), ticket.getPrice() );
+        assertEquals((new BigDecimal(0.75).multiply(Fare.BIKE_RATE_PER_HOUR)).setScale(2, RoundingMode.HALF_UP), ticket.getPrice() );
     }
 
     @Test
@@ -107,7 +109,7 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals( (0.75 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
+        assertEquals((new BigDecimal(0.75).multiply(Fare.CAR_RATE_PER_HOUR)).setScale(2, RoundingMode.HALF_UP) , ticket.getPrice());
     }
 
     @Test
@@ -121,7 +123,7 @@ public class FareCalculatorServiceTest {
         ticket.setOutTime(outTime);
         ticket.setParkingSpot(parkingSpot);
         fareCalculatorService.calculateFare(ticket);
-        assertEquals( (24 * Fare.CAR_RATE_PER_HOUR) , ticket.getPrice());
+        assertEquals((new BigDecimal(24).multiply(Fare.CAR_RATE_PER_HOUR)).setScale(2, RoundingMode.HALF_UP) , ticket.getPrice());
     }
 
 }
