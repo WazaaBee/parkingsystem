@@ -110,7 +110,7 @@
                 </dependencies>
                 <configuration>
                		<includes>
-						<include>**/*IT.java</include>
+						<include>**/integration/ParkingDataBaseIT.java</include>
 						<include>**/*Test.java</include>
 					</includes>
                 </configuration>
@@ -126,9 +126,9 @@
                                 <exclude>none</exclude>
                             </excludes>
                             <includes>
-								<include>**/*IT.java</include>
+								<include>**/integration/ParkingDataBaseIT.java</include>
 								<include>**/*Test.java</include>
-							</includes>
+							 </includes>
                         </configuration>
                     </execution>
                 </executions>
