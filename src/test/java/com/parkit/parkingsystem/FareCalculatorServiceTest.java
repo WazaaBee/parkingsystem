@@ -125,5 +125,19 @@ public class FareCalculatorServiceTest {
         fareCalculatorService.calculateFare(ticket);
         assertEquals((new BigDecimal(24).multiply(Fare.CAR_RATE_PER_HOUR)).setScale(2, RoundingMode.HALF_UP) , ticket.getPrice());
     }
+    
+    //Story#1 Test 30 minutes parking gratuit
+    @Test
+    public void calculateFareFreeUnder30Min() {
+    	Date inTime = new Date();
+    	inTime.setTime(System.currentTimeMillis() - (  29 * 60 * 1000) );//29 minutes parking time should give free parking fare
+    	Date outTime = new Date();
+    	ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+    	ticket.setInTime(inTime);
+    	ticket.setOutTime(outTime);
+    	ticket.setParkingSpot(parkingSpot);
+    	fareCalculatorService.calculateFare(ticket);
+    	assertEquals(new BigDecimal("0.00"), ticket.getPrice());
+    }
 
 }

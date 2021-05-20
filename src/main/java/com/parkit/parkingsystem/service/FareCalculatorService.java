@@ -20,17 +20,24 @@ public class FareCalculatorService {
         //Addition d'un BigDecimal pour le prix
         //Erreur corriggée en convertissant le temps en heure et avec l'utilisation d'un nombre décimal
         BigDecimal duration = new BigDecimal ((outHour - inHour)/1000.00/60.00/60.00);
-
-        switch (ticket.getParkingSpot().getParkingType()){
-            case CAR: {
-                ticket.setPrice(duration.multiply(Fare.CAR_RATE_PER_HOUR));
-                break;
-            }
-            case BIKE: {
-                ticket.setPrice(duration.multiply(Fare.BIKE_RATE_PER_HOUR));
-                break;
-            }
-            default: throw new IllegalArgumentException("Unkown Parking Type");
+        
+        //Condition 30 minutes parking gratuit
+        if (duration.doubleValue() < 0.5) {
+        	System.out.println(duration.doubleValue());
+        	ticket.setPrice(new BigDecimal(0));
+        }
+        else {        
+        	switch (ticket.getParkingSpot().getParkingType()){
+            	case CAR: {
+            		ticket.setPrice(duration.multiply(Fare.CAR_RATE_PER_HOUR));
+            		break;
+            	}
+            	case BIKE: {
+            		ticket.setPrice(duration.multiply(Fare.BIKE_RATE_PER_HOUR));
+            		break;
+            	}
+            	default: throw new IllegalArgumentException("Unkown Parking Type");
+        	}
         }
     }
 }
