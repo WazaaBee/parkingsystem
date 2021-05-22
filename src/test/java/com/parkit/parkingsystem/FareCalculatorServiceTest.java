@@ -139,5 +139,20 @@ public class FareCalculatorServiceTest {
     	fareCalculatorService.calculateFare(ticket);
     	assertEquals(new BigDecimal("0.00"), ticket.getPrice());
     }
+    
+    //Story#2 Réduction 5% utilisateur récurent
+    @Test
+    public void calculateFareForRecurentUser() {
+    	Date inTime = new Date();
+    	inTime.setTime(System.currentTimeMillis() - (  60 * 60 * 1000) );//29 minutes parking time should give free parking fare
+    	Date outTime = new Date();
+    	ParkingSpot parkingSpot = new ParkingSpot(1, ParkingType.CAR, false);
+    	ticket.setInTime(inTime);
+    	ticket.setOutTime(outTime);
+    	ticket.setUserExists(true);
+    	ticket.setParkingSpot(parkingSpot);
+    	fareCalculatorService.calculateFare(ticket);
+    	assertEquals(new BigDecimal("1.43"), ticket.getPrice());
+    }
 
 }

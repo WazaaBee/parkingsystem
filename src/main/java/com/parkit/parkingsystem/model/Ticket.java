@@ -11,6 +11,7 @@ public class Ticket {
     private BigDecimal price; // Changement type variable double en BigDecimal ainsi que le setter and getter arrondis & 2 chiffres après la virgule
     private Date inTime;
     private Date outTime;
+    private boolean userExists; // Création d'un variable type boolean pour fonction 5% de reduction
 
     public int getId() {
         return id;
@@ -58,5 +59,13 @@ public class Ticket {
 
     public void setOutTime(Date outTime) {
         this.outTime = outTime;
+    }
+    
+    public boolean getUserExists() {
+    	return userExists;
+    }
+    
+    public void setUserExists(boolean userExists) {
+    	this.userExists = userExists;
     }
 }

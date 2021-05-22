@@ -58,7 +58,7 @@ public class ParkingDataBaseIT {
         //TODO: check that a ticket is actualy saved in DB and Parking table is updated with availability
         // Test ticket est bien sauvé dans la DB
         
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+        Ticket ticket = ticketDAO.getTicket("ABCDEF", true);
         assertNotNull(ticket);        
     }
     
@@ -69,7 +69,7 @@ public class ParkingDataBaseIT {
         //TODO: check that a ticket is actualy saved in DB and Parking table is updated with availability
         // Test place de parking non disponible après entrée d'un véhicule
         
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+        Ticket ticket = ticketDAO.getTicket("ABCDEF", true);
         assertFalse(ticket.getParkingSpot().isAvailable());        
     }
 
@@ -82,7 +82,7 @@ public class ParkingDataBaseIT {
         //TODO: check that the fare generated and out time are populated correctly in the database
         //Test que le prix est bien calculé à la sortie du véhicule
         
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+        Ticket ticket = ticketDAO.getTicket("ABCDEF", true);
         assertNotNull(ticket.getPrice());
     }
     
@@ -96,7 +96,7 @@ public class ParkingDataBaseIT {
         //TODO: check that the fare generated and out time are populated correctly in the database
         //Test que le ticket reçoit bien un outTime à la sortie du véhicule
         
-        Ticket ticket = ticketDAO.getTicket("ABCDEF");
+        Ticket ticket = ticketDAO.getTicket("ABCDEF", true);
         assertNotNull(ticket.getOutTime());
     }
 

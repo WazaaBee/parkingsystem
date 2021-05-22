@@ -25,13 +25,15 @@ public class TicketDAO {
         try {
             con = dataBaseConfig.getConnection();
             PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
-            //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
+            //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME, USER_EXISTS)
             //ps.setInt(1,ticket.getId());
             ps.setInt(1,ticket.getParkingSpot().getId());
             ps.setString(2, ticket.getVehicleRegNumber());
             ps.setBigDecimal(3, ticket.getPrice());
             ps.setTimestamp(4, new Timestamp(ticket.getInTime().getTime()));
             ps.setTimestamp(5, (ticket.getOutTime() == null)?null: (new Timestamp(ticket.getOutTime().getTime())) );
+            //Ajout user_exists
+            ps.setBoolean(6, ticket.getUserExists());
             return ps.execute();
         }catch (Exception ex){
             logger.error("Error fetching next available slot",ex);
@@ -42,7 +44,7 @@ public class TicketDAO {
     }
 
     @SuppressWarnings("finally")
-	public Ticket getTicket(String vehicleRegNumber) {
+	public Ticket getTicket(String vehicleRegNumber, boolean vehicleExitingIsFalse) {
         Connection con = null;
         Ticket ticket = null;
         try {
@@ -50,6 +52,15 @@ public class TicketDAO {
             PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
             ps.setString(1,vehicleRegNumber);
+            if (vehicleExitingIsFalse == false) {
+            	ps = con.prepareStatement("select t.PARKING_NUMBER, t.ID, t.PRICE, t.IN_TIME, t.OUT_TIME, p.TYPE, t.USER_EXISTS"
+            			+ " from ticket t,parking p"
+            			+ " where p.parking_number = t.parking_number"
+            			+ " and t.VEHICLE_REG_NUMBER=?"
+            			+ " and t.out_time is null"
+            			+ " order by t.IN_TIME limit 1");
+            	ps.setString(1, vehicleRegNumber);
+            }
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
                 ticket = new Ticket();
@@ -60,6 +71,8 @@ public class TicketDAO {
                 ticket.setPrice(rs.getBigDecimal(3));
                 ticket.setInTime(rs.getTimestamp(4));
                 ticket.setOutTime(rs.getTimestamp(5));
+                //Ajout user_exists
+                ticket.setUserExists(rs.getBoolean(7));
             }
             dataBaseConfig.closeResultSet(rs);
             dataBaseConfig.closePreparedStatement(ps);
@@ -87,5 +100,65 @@ public class TicketDAO {
             dataBaseConfig.closeConnection(con);
         }
         return false;
+    }
+    
+    public boolean checkUserExists (String vehicleRegNumber, ParkingType type) {
+    	boolean checkUserExists = false;
+    	Connection con = null;
+    	try {
+    		con = dataBaseConfig.getConnection();
+    		PreparedStatement ps = con.prepareStatement(DBConstants.CHECK_USER_EXISTS);
+    		ps.setString(1,	vehicleRegNumber);
+    		if (type == ParkingType.CAR) {
+    			ps.setString(2, "1");
+    			ps.setString(3, "2");
+    			ps.setString(4, "3");
+    		}
+    		else if(type == ParkingType.BIKE) {
+    			ps.setString(2, "4");
+    			ps.setString(3, "5");
+    			ps.setString(4, "0"); // valeur incorrecte pour combler la query
+    		}
+    		ResultSet rs = ps.executeQuery();
+    		while(rs.next()) {
+    			checkUserExists = rs.getBoolean(1);
+    			if (checkUserExists == true) {
+    				System.out.println("Welcome back! As a recurring user of our parking lot, you'll benefit from a 5% discount.");
+    				break;
+    			}
+    		}
+    	}catch (Exception ex) {
+    		logger.error("Error checking USER STATUS", ex);
+    	}finally {
+			dataBaseConfig.closeConnection(con);
+		}
+    	return checkUserExists;
+    }
+    
+    //Methode pour modifier le status de USER_EXISTS 
+    public boolean updateUserExists(String vehicleRegNumber, ParkingType type) {
+    	Connection con = null;
+    	try {
+    		con = dataBaseConfig.getConnection();
+    		PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_RECURENT_USER);
+    		ps.setString(1, vehicleRegNumber);
+    		if (type == ParkingType.CAR) {
+    			ps.setString(2, "1");
+    			ps.setString(3, "2");
+    			ps.setString(4, "3");
+    		}
+    		else if(type == ParkingType.BIKE) {
+    			ps.setString(2, "4");
+    			ps.setString(3, "5");
+    			ps.setString(4, "0"); // valeur incorrecte pour combler la query
+    		}
+    		ps.execute();
+    		return true;
+    	}catch (Exception ex) {
+    		logger.error("Error updating USER STATUS", ex);
+    	}finally {
+			dataBaseConfig.closeConnection(con);
+		}
+    	return false;
     }
 }
