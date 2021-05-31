@@ -7,11 +7,11 @@ import com.parkit.parkingsystem.model.ParkingSpot;
 import com.parkit.parkingsystem.model.Ticket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+
 
 public class TicketDAO {
 
@@ -19,12 +19,12 @@ public class TicketDAO {
 
     public DataBaseConfig dataBaseConfig = new DataBaseConfig();
 
-    @SuppressWarnings("finally")
 	public boolean saveTicket(Ticket ticket){
         Connection con = null;
+        PreparedStatement ps = null;
         try {
             con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.SAVE_TICKET);
+            ps = con.prepareStatement(DBConstants.SAVE_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME, USER_EXISTS)
             //ps.setInt(1,ticket.getId());
             ps.setInt(1,ticket.getParkingSpot().getId());
@@ -35,24 +35,29 @@ public class TicketDAO {
             //Ajout user_exists
             ps.setBoolean(6, ticket.getUserExists());
             return ps.execute();
-        }catch (Exception ex){
+        }catch (RuntimeException e) {
+    		throw e;
+    	}catch (Exception ex) {
             logger.error("Error fetching next available slot",ex);
         }finally {
-            dataBaseConfig.closeConnection(con);
-            return false;
+        	DataBaseConfig.close(null, ps, con);
         }
+        return false;
     }
 
-    @SuppressWarnings("finally")
+
 	public Ticket getTicket(String vehicleRegNumber, boolean vehicleExitingIsFalse) {
         Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
         Ticket ticket = null;
         try {
             con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.GET_TICKET);
+            ps = con.prepareStatement(DBConstants.GET_TICKET);
             //ID, PARKING_NUMBER, VEHICLE_REG_NUMBER, PRICE, IN_TIME, OUT_TIME)
             ps.setString(1,vehicleRegNumber);
             if (vehicleExitingIsFalse == false) {
+            	ps.close();
             	ps = con.prepareStatement("select t.PARKING_NUMBER, t.ID, t.PRICE, t.IN_TIME, t.OUT_TIME, p.TYPE, t.USER_EXISTS"
             			+ " from ticket t,parking p"
             			+ " where p.parking_number = t.parking_number"
@@ -61,7 +66,7 @@ public class TicketDAO {
             			+ " order by t.IN_TIME limit 1");
             	ps.setString(1, vehicleRegNumber);
             }
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             if(rs.next()){
                 ticket = new Ticket();
                 ParkingSpot parkingSpot = new ParkingSpot(rs.getInt(1), ParkingType.valueOf(rs.getString(6)),false);
@@ -74,30 +79,33 @@ public class TicketDAO {
                 //Ajout user_exists
                 ticket.setUserExists(rs.getBoolean(7));
             }
-            dataBaseConfig.closeResultSet(rs);
-            dataBaseConfig.closePreparedStatement(ps);
-        }catch (Exception ex){
+        }catch (RuntimeException e) {
+    		throw e;
+    	}catch (Exception ex){
             logger.error("Error fetching next available slot",ex);
         }finally {
-            dataBaseConfig.closeConnection(con);
-            return ticket;
+        	DataBaseConfig.close(rs, ps, con);
         }
+        return ticket;
     }
 
     public boolean updateTicket(Ticket ticket) {
         Connection con = null;
+        PreparedStatement ps = null;
         try {
             con = dataBaseConfig.getConnection();
-            PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
+            ps = con.prepareStatement(DBConstants.UPDATE_TICKET);
             ps.setBigDecimal(1, ticket.getPrice());
             ps.setTimestamp(2, new Timestamp(ticket.getOutTime().getTime()));
             ps.setInt(3,ticket.getId());
             ps.execute();
             return true;
-        }catch (Exception ex){
+        }catch (RuntimeException e) {
+    		throw e;
+    	}catch (Exception ex){
             logger.error("Error saving ticket info",ex);
         }finally {
-            dataBaseConfig.closeConnection(con);
+        	DataBaseConfig.close(null, ps, con);
         }
         return false;
     }
@@ -105,9 +113,11 @@ public class TicketDAO {
     public boolean checkUserExists (String vehicleRegNumber, ParkingType type) {
     	boolean checkUserExists = false;
     	Connection con = null;
+    	PreparedStatement ps = null;
+    	ResultSet rs = null;
     	try {
     		con = dataBaseConfig.getConnection();
-    		PreparedStatement ps = con.prepareStatement(DBConstants.CHECK_USER_EXISTS);
+    		ps = con.prepareStatement(DBConstants.CHECK_USER_EXISTS);
     		ps.setString(1,	vehicleRegNumber);
     		if (type == ParkingType.CAR) {
     			ps.setString(2, "1");
@@ -118,8 +128,8 @@ public class TicketDAO {
     			ps.setString(2, "4");
     			ps.setString(3, "5");
     			ps.setString(4, "0"); // valeur incorrecte pour combler la query
-    		}
-    		ResultSet rs = ps.executeQuery();
+    		} 		
+    		rs = ps.executeQuery();
     		while(rs.next()) {
     			checkUserExists = rs.getBoolean(1);
     			if (checkUserExists == true) {
@@ -127,20 +137,23 @@ public class TicketDAO {
     				break;
     			}
     		}
+    	}catch (RuntimeException e) {
+    		throw e;
     	}catch (Exception ex) {
     		logger.error("Error checking USER STATUS", ex);
     	}finally {
-			dataBaseConfig.closeConnection(con);
-		}
+    		DataBaseConfig.close(rs, ps, con);
+    	}
     	return checkUserExists;
     }
     
     //Methode pour modifier le status de USER_EXISTS 
     public boolean updateUserExists(String vehicleRegNumber, ParkingType type) {
     	Connection con = null;
+    	PreparedStatement ps = null;
     	try {
     		con = dataBaseConfig.getConnection();
-    		PreparedStatement ps = con.prepareStatement(DBConstants.UPDATE_RECURENT_USER);
+    		ps = con.prepareStatement(DBConstants.UPDATE_RECURENT_USER);
     		ps.setString(1, vehicleRegNumber);
     		if (type == ParkingType.CAR) {
     			ps.setString(2, "1");
@@ -154,10 +167,12 @@ public class TicketDAO {
     		}
     		ps.execute();
     		return true;
+    	}catch (RuntimeException e) {
+    		throw e;
     	}catch (Exception ex) {
-    		logger.error("Error updating USER STATUS", ex);
+     		logger.error("Error updating USER STATUS", ex);
     	}finally {
-			dataBaseConfig.closeConnection(con);
+    		DataBaseConfig.close(null, ps, con);
 		}
     	return false;
     }

@@ -8,7 +8,7 @@ public class Ticket {
     private int id;
     private ParkingSpot parkingSpot;
     private String vehicleRegNumber;
-    private BigDecimal price; // Changement type variable double en BigDecimal ainsi que le setter and getter arrondis & 2 chiffres après la virgule
+    private BigDecimal price = new BigDecimal("0"); // Changement type variable double en BigDecimal ainsi que le setter and getter arrondis & 2 chiffres après la virgule
     private Date inTime;
     private Date outTime;
     private boolean userExists; // Création d'un variable type boolean pour fonction 5% de reduction
@@ -46,19 +46,23 @@ public class Ticket {
     }
 
     public Date getInTime() {
-        return inTime;
+        Date inTimeRepresentation = inTime;
+    	return inTimeRepresentation;
     }
 
     public void setInTime(Date inTime) {
-        this.inTime = inTime;
+    	this.inTime = new Date(inTime.getTime());
     }
 
     public Date getOutTime() {
-        return outTime;
+    	Date outTimeRepresentation = outTime;
+        return outTimeRepresentation;
     }
 
     public void setOutTime(Date outTime) {
-        this.outTime = outTime;
+        if (outTime != null) {
+        	this.outTime = new Date(outTime.getTime());
+        }
     }
     
     public boolean getUserExists() {
