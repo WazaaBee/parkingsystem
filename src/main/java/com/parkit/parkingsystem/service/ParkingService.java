@@ -35,7 +35,6 @@ public class ParkingService {
                 String vehicleRegNumber = getVehichleRegNumber();
                 parkingSpot.setAvailable(false);
                 boolean userExists = ticketDAO.checkUserExists(vehicleRegNumber, parkingSpot.getParkingType());
-                System.out.println(userExists);
                 if (userExists == true) {
                 	ticketDAO.updateUserExists(vehicleRegNumber, parkingSpot.getParkingType());
                 }
@@ -110,8 +109,6 @@ public class ParkingService {
             Ticket ticket = ticketDAO.getTicket(vehicleRegNumber, false);
             Date outTime = new Date();
             ticket.setOutTime(outTime);
-            System.out.println(outTime);
-            System.out.println(new Date(outTime.getTime()));
             fareCalculatorService.calculateFare(ticket);
             if(ticketDAO.updateTicket(ticket)) {
                 ParkingSpot parkingSpot = ticket.getParkingSpot();
