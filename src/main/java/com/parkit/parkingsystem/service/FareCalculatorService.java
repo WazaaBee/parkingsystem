@@ -11,19 +11,10 @@ public class FareCalculatorService {
         if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
             throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
         }
-        
-        //Variable permettant d'effectuer la reduction si utilisateur récurent
         BigDecimal discount = new BigDecimal(1);
         long inHour = ticket.getInTime().getTime();
         long outHour = ticket.getOutTime().getTime();
-
-        //TODO: Some tests are failing here. Need to check if this logic is correct
-        //Changement du type des variables de int a long et double pour la durée
-        //Addition d'un BigDecimal pour le prix
-        //Erreur corriggée en convertissant le temps en heure et avec l'utilisation d'un nombre décimal
         BigDecimal duration = new BigDecimal ((outHour - inHour)/1000.00/60.00/60.00);
-        
-        //Condition 30 minutes parking gratuit
         if (duration.doubleValue() < 0.5) {
         	ticket.setPrice(new BigDecimal(0));
         }
